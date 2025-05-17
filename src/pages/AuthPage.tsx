@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { LogIn, UserPlus } from 'lucide-react';
+import { LogIn, UserPlus, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Navbar from '@/components/layout/Navbar';
 import { useToast } from '@/hooks/use-toast';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from '@/components/ui/dialog';
 
 const AuthPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -21,6 +29,8 @@ const AuthPage = () => {
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+  const [forgotPasswordDialogOpen, setForgotPasswordDialogOpen] = useState(false);
   
   const handleTabChange = (value: string) => {
     searchParams.set('tab', value);
@@ -57,6 +67,28 @@ const AuthPage = () => {
       description: "Your account has been created!",
     });
     navigate("/dashboard");
+  };
+
+  const handleForgotPassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!forgotPasswordEmail) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    console.log('Password reset requested for:', forgotPasswordEmail);
+    // Mock password reset email sent
+    toast({
+      title: "Password reset email sent",
+      description: "Check your inbox for instructions to reset your password.",
+    });
+    setForgotPasswordDialogOpen(false);
+    setForgotPasswordEmail('');
   };
   
   return (
@@ -99,7 +131,12 @@ const AuthPage = () => {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <Label htmlFor="login-password">Password</Label>
-                        <Button variant="link" type="button" className="p-0 h-auto font-normal text-xs">
+                        <Button 
+                          variant="link" 
+                          type="button" 
+                          className="p-0 h-auto font-normal text-xs"
+                          onClick={() => setForgotPasswordDialogOpen(true)}
+                        >
                           Forgot password?
                         </Button>
                       </div>
@@ -173,6 +210,46 @@ const AuthPage = () => {
           </Tabs>
         </div>
       </main>
+
+      {/* Forgot Password Dialog */}
+      <Dialog open={forgotPasswordDialogOpen} onOpenChange={setForgotPasswordDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <form onSubmit={handleForgotPassword}>
+            <DialogHeader>
+              <DialogTitle>Reset your password</DialogTitle>
+              <DialogDescription>
+                Enter your email address and we'll send you a link to reset your password.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-2">
+                <Label htmlFor="forgot-password-email">Email</Label>
+                <Input
+                  id="forgot-password-email"
+                  type="email"
+                  placeholder="youremail@example.com"
+                  value={forgotPasswordEmail}
+                  onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                  className="w-full"
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setForgotPasswordDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" className="bg-interview-primary hover:bg-interview-secondary">
+                <Mail className="h-4 w-4 mr-2" /> Send Reset Link
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
